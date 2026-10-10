@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #000000;
+  --color-brand-accent: #d4ff00;
+  --color-brand-dark: #000000;
+  --color-brand-light: #ffffff;
+  --color-brand-gray: #a1a1aa;
+}
+
+/* ─── Custom Properties ─── */
+:root {
+  --clr-bg-deep: #050907;
+  --clr-gold: #FFB300;
+  --clr-cyan: #00E3FF;
+  --font-display: "Orbitron", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  background: var(--clr-bg-deep);
+  color: white;
+  font-family: var(--font-body);
+  cursor: auto;
+  overflow-x: hidden;
+}
+
+/* Hero page needs overflow hidden for the 3D canvas */
+.hero-page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Solar app scrolls normally */
+.solar-page {
+  width: 100%;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Base utility for standard text */
+.text-glow-cyan {
+  text-shadow: 0 0 10px rgba(0, 227, 255, 0.4);
+}
+.text-glow-gold {
+  text-shadow: 0 0 10px rgba(255, 179, 0, 0.4);
+}
+
+/* Leaflet pin animation */
+@keyframes ping {
+  0%   { transform: scale(1); opacity: 0.8; }
+  75%  { transform: scale(2); opacity: 0; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+/* Prevent Leaflet popup default styles clashing */
+.leaflet-container {
+  font-family: inherit;
+  background: #050907;
+}
+
+/* Scrollbar hiding for internal scrollable areas */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
