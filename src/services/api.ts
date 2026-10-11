@@ -170,7 +170,87 @@ export async function searchLocation(query: string): Promise<LocationSearchResul
   return [];
 }
 
+export const STATE_SOLAR_DATA: Record<string, number> = {
+  'Rajasthan': 165, 'Gujarat': 150, 'Maharashtra': 135, 'Karnataka': 144, 'Tamil Nadu': 138,
+  'Kerala': 114, 'Delhi': 135, 'Uttar Pradesh': 129, 'UP': 129, 'Punjab': 135, 'Haryana': 138,
+  'West Bengal': 117, 'Bihar': 126, 'Odisha': 132, 'Madhya Pradesh': 141, 'MP': 141, 'Chhattisgarh': 135,
+  'Telangana': 144, 'Andhra Pradesh': 147, 'AP': 147, 'Jharkhand': 123, 'Assam': 111, 'Goa': 132,
+  'Uttarakhand': 132, 'Himachal Pradesh': 129, 'HP': 129, 'Jammu and Kashmir': 129, 'J&K': 129, 'Ladakh': 180,
+  'Sikkim': 108, 'Meghalaya': 105, 'Nagaland': 108, 'Manipur': 108, 'Mizoram': 108,
+  'Tripura': 111, 'Arunachal Pradesh': 108, 'Chandigarh': 135, 'Puducherry': 141,
+  'Dadra and Nagar Haveli and Daman and Diu': 147, 'D&NH/DD': 147, 'Lakshadweep': 144,
+  'Andaman and Nicobar Islands': 126, 'A&N': 126,
+};
+
+export function calculateSolarAnalysisEngine(params: {
+  monthlyBill: number;
+  roofAreaSqft: number;
+  averageTariff: number;
+  state?: string;
+}): SolarAnalysisResult {
+  const bill = params.monthlyBill || 2500;
+  const area = params.roofAreaSqft || 1200;
+  const tariff = params.averageTariff || 8.0;
+  const state = params.state || 'Karnataka';
+  const unitsPerKwMonth = STATE_SOLAR_DATA[state] || 120;
+
+  const monthlyUnits = Math.round(bill / tariff);
+  const capacityByBill = monthlyUnits / unitsPerKwMonth;
+  const capacityByArea = (area * 0.75) / 100.0;
+  const recommendedKw = Math.max(1.0, Math.round(Math.min(capacityByBill, capacityByArea) * 10) / 10);
+  const annualGenUnits = Math.round(recommendedKw * unitsPerKwMonth * 12);
+  const annualSavings = Math.round(annualGenUnits * tariff);
+
+  let centralSubsidy = 0;
+  if (recommendedKw >= 3) {
+    centralSubsidy = 78000;
+  } else if (recommendedKw >= 2) {
+    centralSubsidy = 60000 + (recommendedKw - 2) * 18000;
+  } else {
+    centralSubsidy = recommendedKw * 30000;
+  }
+
+  const grossCapex = Math.round(recommendedKw * 52000);
+  const netCost = Math.max(0, Math.round(grossCapex - centralSubsidy));
+  const payback = annualSavings > 0 ? Number((netCost / annualSavings).toFixed(1)) : 2.5;
+  const co2 = Number((recommendedKw * 1.2).toFixed(2));
+  const roi = Number(((annualSavings / (netCost || 1)) * 100).toFixed(1));
+
+  const savings10yr = Array.from({ length: 10 }, (_, i) => Math.round(annualSavings * (i + 1)));
+  const gridCost10yr = Array.from({ length: 10 }, (_, i) =>
+    Math.round(annualSavings * Math.pow(1.05, i) * (i + 1))
+  );
+
+  return {
+    analysis_id: 'sa_' + Math.random().toString(36).substring(2, 9),
+    recommended_capacity_kw: recommendedKw,
+    estimated_generation_kwh_per_year: annualGenUnits,
+    gross_cost: grossCapex,
+    subsidy_breakdown: {
+      central_subsidy: centralSubsidy,
+      state_subsidy: 0,
+      total_subsidy: centralSubsidy,
+      details: [
+        'PM Surya Ghar Muft Bijli Yojana (Direct DBT Transfer)',
+        `State DISCOM (${state}) Net Metering Solar Billing Policy`
+      ]
+    },
+    net_cost: netCost,
+    payback_period_years: payback,
+    annual_savings: annualSavings,
+    co2_reduction_tons_per_year: co2,
+    roi_percentage: roi,
+    savings_projection_10yr: savings10yr,
+    grid_cost_projection_10yr: gridCost10yr,
+  };
+}
+
 export async function analyzeSite(formData: FormData): Promise<SolarAnalysisResult> {
+  const bill = parseFloat(String(formData.get('monthly_bill_inr') || '2500'));
+  const area = parseFloat(String(formData.get('approx_roof_area_sqft') || '1200'));
+  const tariff = parseFloat(String(formData.get('avg_tariff_per_unit') || '8.0'));
+  const state = String(formData.get('state') || 'Karnataka');
+
   try {
     const response = await fetch(`${API_BASE}/api/v1/consumer/analyze-site`, {
       method: 'POST',
@@ -207,36 +287,23 @@ export async function analyzeSite(formData: FormData): Promise<SolarAnalysisResu
       };
     }
   } catch (e) {
-    console.warn('API call failed, using local simulation:', e);
+    console.warn('API call failed, using local simulation calculated from inputs:', e);
   }
 
-  // Fallback simulation
+  // Fallback simulation dynamically calculated from the exact form parameters
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve({
-        analysis_id: '12345',
-        recommended_capacity_kw: 5,
-        estimated_generation_kwh_per_year: 7000,
-        gross_cost: 260000,
-        subsidy_breakdown: {
-          central_subsidy: 78000,
-          state_subsidy: 0,
-          total_subsidy: 78000,
-          details: ['PM Surya Ghar Muft Bijli Yojana', 'State Government Subsidy']
-        },
-        net_cost: 182000,
-        payback_period_years: 3.2,
-        annual_savings: 56000,
-        co2_reduction_tons_per_year: 6.0,
-        roi_percentage: 30.8,
-        savings_projection_10yr: [56000, 112000, 168000, 224000, 280000, 336000, 392000, 448000, 504000, 560000],
-        grid_cost_projection_10yr: [56000, 117600, 185220, 258200, 336890, 421600, 512600, 610300, 715000, 827000]
-      });
-    }, 1200);
+      resolve(calculateSolarAnalysisEngine({
+        monthlyBill: bill,
+        roofAreaSqft: area,
+        averageTariff: tariff,
+        state: state
+      }));
+    }, 600);
   });
 }
 
-export async function getVendorQuotes(analysisId: string): Promise<VendorQuote[]> {
+export async function getVendorQuotes(analysisId: string, baseNetCost?: number): Promise<VendorQuote[]> {
   try {
     const res = await fetch(`${API_BASE}/api/v1/consumer/vendor-quotes/${analysisId}`);
     if (res.ok) {
@@ -257,6 +324,8 @@ export async function getVendorQuotes(analysisId: string): Promise<VendorQuote[]
     console.warn('Vendor quotes offline, using fallback:', err);
   }
 
+  const basePrice = baseNetCost && baseNetCost > 0 ? baseNetCost : 160000;
+
   return [
     {
       quote_id: 'q1',
@@ -265,7 +334,7 @@ export async function getVendorQuotes(analysisId: string): Promise<VendorQuote[]
       panel_brand: 'Tata 550W Bifacial',
       inverter_type: 'String Inverter',
       warranty_years: 25,
-      total_price: 162000,
+      total_price: Math.round(basePrice * 1.03),
       subsidy_inclusive: true,
       installation_days: 7
     },
@@ -276,7 +345,7 @@ export async function getVendorQuotes(analysisId: string): Promise<VendorQuote[]
       panel_brand: 'Waaree 540W Mono PERC',
       inverter_type: 'Microinverter',
       warranty_years: 25,
-      total_price: 159000,
+      total_price: Math.round(basePrice * 0.99),
       subsidy_inclusive: true,
       installation_days: 5
     },
@@ -287,7 +356,7 @@ export async function getVendorQuotes(analysisId: string): Promise<VendorQuote[]
       panel_brand: 'Adani 540W Mono PERC',
       inverter_type: 'Hybrid Inverter',
       warranty_years: 25,
-      total_price: 155000,
+      total_price: Math.round(basePrice * 0.97),
       subsidy_inclusive: true,
       installation_days: 8
     }

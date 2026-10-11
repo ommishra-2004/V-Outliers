@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSolarStore } from '../../../store/solarStore';
 import { CheckCircle2, Edit3, Loader2, MapPin, Zap, ShieldCheck, Sun, TrendingUp, Sparkles, ChevronLeft } from 'lucide-react';
-import { analyzeSite } from '../../../services/api';
+import { analyzeSite, calculateSolarAnalysisEngine } from '../../../services/api';
 
 const STATE_SOLAR_DATA: Record<string, number> = {
   'Rajasthan': 165, 'Gujarat': 150, 'Maharashtra': 135, 'Karnataka': 144,
@@ -17,7 +17,11 @@ const STATE_SOLAR_DATA: Record<string, number> = {
   'Lakshadweep': 144, 'Andaman and Nicobar Islands': 126,
 };
 
-export default function ReviewStep() {
+interface ReviewStepProps {
+  onReportGenerated?: () => void;
+}
+
+export default function ReviewStep({ onReportGenerated }: ReviewStepProps) {
   const { siteInput, setStep, setLoading, isLoading, setAnalysisResult, setError, detectedGrossArea, detectedUsableArea } = useSolarStore();
 
   const unitsPerKwMonth = STATE_SOLAR_DATA[siteInput.state as keyof typeof STATE_SOLAR_DATA] || 120;
@@ -29,10 +33,10 @@ export default function ReviewStep() {
   const totalPanels = Math.ceil(capacity * 2.5);
   const annualUnits = Math.round(capacity * unitsPerKwMonth * 12);
   const annualSavings = Math.round(annualUnits * tariff);
-  const centralSubsidy = capacity >= 3.0 ? 78000 : capacity >= 2.0 ? 60000 : 30000;
-  const grossCapex = capacity * 52000;
-  const netPayable = Math.max(0, grossCapex - centralSubsidy);
-  const tenYearSavings = Math.round((annualSavings * 10) - netPayable);
+  const estimate = calculateSolarAnalysisEngine({ monthlyBill: bill, roofAreaSqft: area, averageTariff: tariff, state: siteInput.state });
+  const centralSubsidy = estimate.subsidy_breakdown.central_subsidy;
+  const netPayable = estimate.net_cost;
+  const tenYearSavings = estimate.savings_projection_10yr[9] - netPayable;
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -50,6 +54,8 @@ export default function ReviewStep() {
 
       const result = await analyzeSite(formData);
       setAnalysisResult(result);
+      // Tell SolarApp to navigate to dashboard — only triggered by explicit user submit
+      if (onReportGenerated) onReportGenerated();
     } catch (err) {
       setError('Failed to analyze site. Please try again.');
     } finally {
@@ -65,18 +71,18 @@ export default function ReviewStep() {
       <div className="border-b border-white/10 pb-4">
         <div className="flex items-center gap-2 text-emerald-400 text-xs font-black uppercase tracking-widest mb-1.5">
           <CheckCircle2 className="w-4 h-4" />
-          <span>Step 3 of 3 · Final Verification &amp; Report Generation</span>
+          <span>Step 3 of 3 · Review your plan</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-          Review Assessment Summary
+          Everything look right?
         </h2>
         <p className="text-sm text-slate-400 mt-1 max-w-3xl">
-          Confirm your site parameters and consumption profile before we compute your detailed financial breakdown and load vetted Indian solar vendor quotes.
+          Review your rooftop and energy details, then explore your solar report and personalised demo vendor packages.
         </p>
       </div>
 
       {/* ── 2-Column Summary Cards ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 lg:gap-9 items-start">
         {/* Card 1: Rooftop & Location Profile */}
         <div className="bg-slate-900/80 border border-white/10 rounded-3xl p-6 shadow-xl relative group space-y-4">
           <div className="flex justify-between items-center border-b border-white/10 pb-3">
@@ -86,7 +92,7 @@ export default function ReviewStep() {
             </h3>
             <button
               onClick={() => setStep(1)}
-              className="text-xs sm:text-sm text-slate-200 hover:text-emerald-300 font-bold flex items-center gap-2 transition-all bg-slate-950/90 hover:bg-slate-800 px-4 py-2 rounded-xl border border-white/10 hover:border-emerald-500/40 shadow-sm hover:scale-105 active:scale-95"
+              className="text-xs sm:text-sm text-slate-200 hover:text-emerald-300 font-bold flex items-center gap-2 transition-all bg-slate-950/90 hover:bg-slate-800 px-5 py-2.5 my-1.5 rounded-xl border border-white/10 hover:border-emerald-500/40 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
             >
               <Edit3 className="w-4 h-4 text-emerald-400" /> 
               <span>Edit Rooftop</span>
@@ -130,7 +136,7 @@ export default function ReviewStep() {
             </h3>
             <button
               onClick={() => setStep(2)}
-              className="text-xs sm:text-sm text-slate-200 hover:text-emerald-300 font-bold flex items-center gap-2 transition-all bg-slate-950/90 hover:bg-slate-800 px-4 py-2 rounded-xl border border-white/10 hover:border-emerald-500/40 shadow-sm hover:scale-105 active:scale-95"
+              className="text-xs sm:text-sm text-slate-200 hover:text-emerald-300 font-bold flex items-center gap-2 transition-all bg-slate-950/90 hover:bg-slate-800 px-5 py-2.5 my-1.5 rounded-xl border border-white/10 hover:border-emerald-500/40 shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
             >
               <Edit3 className="w-4 h-4 text-amber-400" /> 
               <span>Edit Usage</span>
@@ -192,31 +198,31 @@ export default function ReviewStep() {
       </div>
 
       {/* Standardized Full-Width Responsive Action Footer */}
-      <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 border-t border-white/10 mt-auto">
+      <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 sm:gap-5 pt-5 border-t border-white/10 mt-auto">
         <button
           type="button"
           onClick={() => setStep(2)}
-          className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-sm sm:text-base bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-white/15 hover:border-emerald-500/40 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer shrink-0"
+          className="w-full sm:w-auto px-8 py-4 my-2 rounded-2xl font-black text-sm sm:text-base bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-white/15 hover:border-emerald-500/40 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2.5 cursor-pointer shrink-0"
         >
           <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />
-          <span>Back to Energy Details</span>
+          <span>Back to energy use</span>
         </button>
 
         <button
           type="button"
           onClick={handleSubmit}
           disabled={isLoading}
-          className="w-full sm:flex-1 py-4 sm:py-4.5 px-6 sm:px-8 rounded-2xl font-black text-sm sm:text-base lg:text-lg bg-gradient-to-r from-emerald-500 via-emerald-400 to-lime-400 hover:from-emerald-400 hover:to-lime-300 text-slate-950 shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/60 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+          className="w-full sm:flex-1 py-5 px-8 my-2 rounded-2xl font-black text-sm sm:text-base lg:text-lg bg-gradient-to-r from-emerald-500 via-emerald-400 to-lime-400 hover:from-emerald-400 hover:to-lime-300 text-slate-950 shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/60 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2.5 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
         >
           {isLoading ? (
             <>
               <Loader2 className="w-6 h-6 animate-spin text-slate-950" />
-              <span>Generating AI Feasibility Report &amp; Marketplace Quotes...</span>
+              <span>Preparing your solar report...</span>
             </>
           ) : (
             <>
               <Sparkles className="w-5 h-5 text-slate-950" />
-              <span>Generate AI Feasibility Report &amp; Reverse-Auction Quotes →</span>
+              <span>Create my solar report →</span>
             </>
           )}
         </button>

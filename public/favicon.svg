@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="sunGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+    <linearGradient id="coreGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBBF24" />
+      <stop offset="50%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#064e3b" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#050907" stop-opacity="1" />
+    </radialGradient>
+  </defs>
+
+  <!-- Dark circular background with emerald border ring -->
+  <circle cx="32" cy="32" r="30" fill="url(#bgGlow)" stroke="#10B981" stroke-width="2.5" />
+
+  <!-- 8 Radiant Solar Rays -->
+  <g stroke="url(#sunGlow)" stroke-width="3" stroke-linecap="round">
+    <line x1="32" y1="10" x2="32" y2="15" />
+    <line x1="32" y1="49" x2="32" y2="54" />
+    <line x1="10" y1="32" x2="15" y2="32" />
+    <line x1="49" y1="32" x2="54" y2="32" />
+    <line x1="16.5" y1="16.5" x2="20.5" y2="20.5" />
+    <line x1="43.5" y1="43.5" x2="47.5" y2="47.5" />
+    <line x1="16.5" y1="47.5" x2="20.5" y2="43.5" />
+    <line x1="43.5" y1="20.5" x2="47.5" y2="16.5" />
+  </g>
+
+  <!-- Central Solar Core with Sun & Clean Energy Fusion -->
+  <circle cx="32" cy="32" r="11" fill="url(#coreGlow)" />
+
+  <!-- Crisp Clean Energy Leaf / Light Curve -->
+  <path d="M 27 34 Q 32 24 37 34 Q 32 28 27 34 Z" fill="#FFFFFF" opacity="0.95" />
+</svg>

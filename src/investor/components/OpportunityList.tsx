@@ -1,5 +1,5 @@
 import { Opportunity } from "../types";
-import { Battery, Zap, Sun } from "lucide-react";
+import { ArrowUpRight, Search, Sun } from "lucide-react";
 
 interface Props {
   opportunities: Opportunity[];
@@ -8,65 +8,14 @@ interface Props {
 }
 
 export default function OpportunityList({ opportunities, selectedId, onSelect }: Props) {
-  if (opportunities.length === 0) {
-    return (
-      <div className="p-8 text-center text-gray-500 text-xs">
-        No opportunities match the current filter selection.
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col">
-      {opportunities.map((opp, idx) => (
-        <div 
-          key={opp.id}
-          onClick={() => onSelect(opp.id)}
-          className={`p-3.5 border-b border-gray-800 cursor-pointer transition-colors ${
-            selectedId === opp.id 
-              ? 'bg-brand-accent/10 border-l-4 border-l-brand-accent' 
-              : 'hover:bg-gray-900 border-l-4 border-l-transparent'
-          }`}
-        >
-          <div className="flex justify-between items-start mb-1.5">
-            <div>
-              <div className="text-[11px] text-gray-400 flex items-center gap-1.5 mb-0.5">
-                <span className="font-mono text-gray-500 font-bold">#{idx + 1}</span>
-                <span>•</span>
-                <span>{opp.districtOrCity}, {opp.state}</span>
-              </div>
-              <h4 className="font-semibold text-xs leading-tight text-white">{opp.name}</h4>
-            </div>
-            <div className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
-              opp.opportunityBand === 'high' 
-                ? 'bg-[#3687a9] text-white' 
-                : opp.opportunityBand === 'medium'
-                ? 'bg-[#00f5d4] text-black font-extrabold'
-                : 'bg-[#a78bfa]/20 text-[#a78bfa] border border-[#a78bfa]/40'
-            }`}>
-              {opp.opportunityScore}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3 text-[11px] text-gray-400 mt-2.5">
-            <div className="flex items-center gap-1 text-gray-300" title="Total EV Registrations">
-              <Zap size={11} className="text-brand-accent" />
-              <span>{opp.totalRegistrations ? `${(opp.totalRegistrations / 1000).toFixed(1)}k EVs` : `${opp.evDemandIndex}`}</span>
-            </div>
-            <div className="flex items-center gap-1 text-gray-300" title="Charging Gap (EVs / Charger)">
-              <Battery size={11} className="text-amber-400" />
-              <span>{opp.evPerCharger ? `${opp.evPerCharger} /chr` : `${opp.chargingGapIndex}`}</span>
-            </div>
-            <div className="flex items-center gap-1 text-yellow-400" title="State Solar Yield (kWh/kW/month)">
-              <Sun size={11} />
-              <span>{opp.solarUnitsPerKwMonth ? `${opp.solarUnitsPerKwMonth} u/mo` : `${opp.solarPotentialIndex}`}</span>
-            </div>
-            <div className="ml-auto text-[10px] text-gray-300 border border-gray-700 px-1.5 py-0.5 rounded bg-gray-900">
-              {opp.estimatedBudgetBand}
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  if (!opportunities.length) return <div className="opportunity-empty"><Search size={24} /><h3>No matching locations</h3><p>Try another city or broaden your filters.</p></div>;
+  return <div className="opportunity-list">{opportunities.map((opp, idx) => (
+    <button type="button" key={opp.id} onClick={() => onSelect(opp.id)} aria-pressed={selectedId === opp.id} className={`opportunity-card ${selectedId === opp.id ? 'is-selected' : ''}`}>
+      <div className="opportunity-topline"><span>{String(idx + 1).padStart(2, '0')} <span> / {opp.state}</span></span><span className={`opportunity-score ${opp.opportunityBand}`}>{opp.opportunityScore}<small> / 100</small></span></div>
+      <h3>{opp.name}<ArrowUpRight size={17} /></h3>
+      <p className="opportunity-city">{opp.districtOrCity}</p>
+      <div className="opportunity-metrics"><div><span>{opp.totalRegistrations ? 'Registered EVs' : 'EV demand index'}</span><strong>{opp.totalRegistrations ? opp.totalRegistrations.toLocaleString('en-IN') : opp.evDemandIndex}</strong></div><div><span>{opp.evPerCharger ? 'EVs / charger' : 'Charging gap index'}</span><strong>{opp.evPerCharger || opp.chargingGapIndex}</strong></div></div>
+      <div className="opportunity-footer"><span><Sun size={13} />{opp.solarUnitsPerKwMonth ? `${opp.solarUnitsPerKwMonth} kWh/kW/mo` : `${opp.solarPotentialIndex} solar index`}</span><span>{opp.estimatedBudgetBand}</span></div>
+    </button>
+  ))}</div>;
 }

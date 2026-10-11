@@ -201,7 +201,7 @@ def generate_intelligent_reply(query: str, user_state: Optional[str]) -> Tuple[s
     # 1. Greetings / Bot Persona
     if re.search(r"\b(hi|hello|hey|who are you|what can you do|namaste)\b", q) and len(q) < 35:
         greeting_text = (
-            "👋 **Namaste! I am your SuryaPunk Solar Assistant.**\n\n"
+            "👋 **Namaste! I am your SuryaEase Solar Assistant.**\n\n"
             "I can help you navigate India's rooftop solar ecosystem. Here are common topics you can ask me about:\n\n"
             "1. 💰 **Subsidies & Slabs**: How much money you get back under PM Surya Ghar Muft Bijli Yojana (up to ₹78,000 central + state bonuses).\n"
             "2. 🏛️ **State Policies**: Subsidies & net metering for " + (user_state or "your state") + " (e.g., UP's ₹30,000 top-up, Delhi's GBI).\n"
@@ -418,7 +418,7 @@ def chat_with_subsidy_assistant(messages: List[ChatMessage], user_state: Optiona
 
     # Build bedrock prompt
     prompt = (
-        f"You are SuryaPunk AI, an authoritative, friendly, and expert Indian rooftop solar advisor.\n"
+        f"You are SuryaEase AI, an authoritative, friendly, and expert Indian rooftop solar advisor.\n"
         f"Answer the user's questions clearly using bullet points, bold metrics, and structured markdown.\n"
         f"User State: {user_state or 'Not specified'}\n\n"
         f"Authoritative Solar Knowledge:\n{SOLAR_POLICY_CONTEXT}\n\n"

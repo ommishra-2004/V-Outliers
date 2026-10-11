@@ -1,4 +1,4 @@
-# 🚀 Complete AWS Deployment Guide: SuryaPunk Clean Energy Platform
+# 🚀 Complete AWS Deployment Guide: SuryaEase Clean Energy Platform
 
 This guide provides end-to-end instructions for deploying both **Part 1 (Individual Solar Sizing & Assessment)** and **Part 2 (Investor EV Hybrid Charging Platform)** to Amazon Web Services (AWS).
 
@@ -78,7 +78,7 @@ aws s3api put-public-access-block \
 
 # 2. Frontend web hosting bucket
 aws s3api create-bucket \
-    --bucket suryapunk-web-prod \
+    --bucket suryaease-web-prod \
     --region ap-south-1 \
     --create-bucket-configuration LocationConstraint=ap-south-1
 ```
@@ -148,7 +148,7 @@ The backend container needs permissions to talk to S3, DynamoDB, and Bedrock.
 Apply the role:
 ```bash
 aws iam create-role \
-    --role-name SuryaPunkBackendAppRunnerRole \
+    --role-name SuryaEaseBackendAppRunnerRole \
     --assume-role-policy-document file://apprunner-trust-policy.json
 ```
 
@@ -201,8 +201,8 @@ aws iam create-role \
 Attach to the role:
 ```bash
 aws iam put-role-policy \
-    --role-name SuryaPunkBackendAppRunnerRole \
-    --policy-name SuryaPunkBackendPolicy \
+    --role-name SuryaEaseBackendAppRunnerRole \
+    --policy-name SuryaEaseBackendPolicy \
     --policy-document file://backend-policy.json
 ```
 
@@ -217,7 +217,7 @@ ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 REGION="ap-south-1"
 
 aws ecr create-repository \
-    --repository-name suryapunk-backend \
+    --repository-name suryaease-backend \
     --region $REGION \
     --image-scanning-configuration scanOnPush=true
 ```
@@ -230,13 +230,13 @@ From your project root:
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
 # Build Docker image
-docker build -t suryapunk-backend:latest -f backend/Dockerfile backend/
+docker build -t suryaease-backend:latest -f backend/Dockerfile backend/
 
 # Tag image
-docker tag suryapunk-backend:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/suryapunk-backend:latest
+docker tag suryaease-backend:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/suryaease-backend:latest
 
 # Push image to ECR
-docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/suryapunk-backend:latest
+docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/suryaease-backend:latest
 ```
 
 ### 3.3 Create AWS App Runner Service
@@ -246,10 +246,10 @@ App Runner provides automatic container builds, zero-downtime rolling deploys, a
 Create `apprunner-service.json`:
 ```json
 {
-  "ServiceName": "suryapunk-api",
+  "ServiceName": "suryaease-api",
   "SourceConfiguration": {
     "ImageRepository": {
-      "ImageIdentifier": "YOUR_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/suryapunk-backend:latest",
+      "ImageIdentifier": "YOUR_ACCOUNT_ID.dkr.ecr.ap-south-1.amazonaws.com/suryaease-backend:latest",
       "ImageRepositoryType": "ECR",
       "ImageConfiguration": {
         "Port": "8000",
@@ -267,7 +267,7 @@ Create `apprunner-service.json`:
   "InstanceConfiguration": {
     "Cpu": "1024",
     "Memory": "2048",
-    "InstanceRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/SuryaPunkBackendAppRunnerRole"
+    "InstanceRoleArn": "arn:aws:iam::YOUR_ACCOUNT_ID:role/SuryaEaseBackendAppRunnerRole"
   }
 }
 ```
@@ -280,7 +280,7 @@ aws apprunner create-service --cli-input-json file://apprunner-service.json
 
 Once deployment completes (approx 3 minutes), retrieve your service URL:
 ```bash
-aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='suryapunk-api'].ServiceUrl" --output text
+aws apprunner list-services --query "ServiceSummaryList[?ServiceName=='suryaease-api'].ServiceUrl" --output text
 ```
 Example Output: `https://abcd1234efgh.ap-south-1.awsapprunner.com`
 
@@ -311,7 +311,7 @@ This produces the optimized production bundle in the `dist/` directory.
 ### 4.3 Upload to S3 Frontend Bucket
 
 ```bash
-aws s3 sync dist/ s3://suryapunk-web-prod --delete
+aws s3 sync dist/ s3://suryaease-web-prod --delete
 ```
 
 ### 4.4 Set Up CloudFront Distribution (HTTPS & SPA Routing)
@@ -321,15 +321,15 @@ CloudFront distributes the React application globally, handles HTTPS certificate
 Create `cloudfront-config.json`:
 ```json
 {
-  "CallerReference": "suryapunk-prod-1",
-  "Comment": "SuryaPunk Web Platform",
+  "CallerReference": "suryaease-prod-1",
+  "Comment": "SuryaEase Web Platform",
   "DefaultRootObject": "index.html",
   "Origins": {
     "Quantity": 1,
     "Items": [
       {
-        "Id": "S3-suryapunk-web-prod",
-        "DomainName": "suryapunk-web-prod.s3.ap-south-1.amazonaws.com",
+        "Id": "S3-suryaease-web-prod",
+        "DomainName": "suryaease-web-prod.s3.ap-south-1.amazonaws.com",
         "S3OriginConfig": {
           "OriginAccessIdentity": ""
         }
@@ -337,7 +337,7 @@ Create `cloudfront-config.json`:
     ]
   },
   "DefaultCacheBehavior": {
-    "TargetOriginId": "S3-suryapunk-web-prod",
+    "TargetOriginId": "S3-suryaease-web-prod",
     "ViewerProtocolPolicy": "redirect-to-https",
     "AllowedMethods": {
       "Quantity": 2,
@@ -429,7 +429,7 @@ In `src/App.tsx`, toggle between:
 Create `.github/workflows/deploy.yml` in your GitHub repository for automated deployment on every `git push`:
 
 ```yaml
-name: Deploy SuryaPunk to AWS
+name: Deploy SuryaEase to AWS
 
 on:
   push:
@@ -453,8 +453,8 @@ jobs:
 
       - name: Build and Push Docker image
         run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/suryapunk-backend:latest -f backend/Dockerfile backend/
-          docker push ${{ steps.login-ecr.outputs.registry }}/suryapunk-backend:latest
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/suryaease-backend:latest -f backend/Dockerfile backend/
+          docker push ${{ steps.login-ecr.outputs.registry }}/suryaease-backend:latest
 
   deploy-frontend:
     runs-on: ubuntu-latest
@@ -481,7 +481,7 @@ jobs:
 
       - name: Sync S3 & Invalidate CloudFront
         run: |
-          aws s3 sync dist/ s3://suryapunk-web-prod --delete
+          aws s3 sync dist/ s3://suryaease-web-prod --delete
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 ```
 

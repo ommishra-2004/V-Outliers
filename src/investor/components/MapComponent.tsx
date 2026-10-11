@@ -13,11 +13,11 @@ const createAttractiveIcon = (band: "high" | "medium" | "low", isSelected: boole
   const height = isSelected ? 38 : 29;
 
   if (band === "high") {
-    mainColor = "#3687a9"; // Electric Sky Blue
-    glowColor = "rgba(52, 171, 222, 0.5)";
+    mainColor = "#71e2b3"; // Electric Sky Blue
+    glowColor = "rgba(113, 226, 179, 0.25)";
   } else if (band === "medium") {
-    mainColor = "#00f5d4"; // Electric Cyan / Neon Mint
-    glowColor = "rgba(0, 245, 212, 0.55)"; 
+    mainColor = "#75c7c4"; // Electric Cyan / Neon Mint
+    glowColor = "rgba(117, 199, 196, 0.25)";
   }
 
   const html = `
@@ -53,24 +53,24 @@ const createAttractiveIcon = (band: "high" | "medium" | "low", isSelected: boole
         <!-- Station Base Anchor & Pedestal -->
         <path d="M10 29.5 L14 34 L18 29.5 Z" fill="${mainColor}" />
         <rect x="3" y="27" width="18" height="3" rx="1.5" fill="${mainColor}" />
-        
+
         <!-- Station Column Body -->
         <rect x="4.5" y="3.5" width="15" height="24" rx="3.5" fill="#090d16" stroke="${mainColor}" stroke-width="${isSelected ? "2.2" : "1.8"}" />
-        
+
         <!-- Live LED Status Indicator -->
         <circle cx="12" cy="6.5" r="1.3" fill="${mainColor}">
           ${band === "high" || isSelected ? '<animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>' : ""}
         </circle>
-        
+
         <!-- Station Digital Display Screen -->
         <rect x="7" y="10" width="10" height="9" rx="1.5" fill="#020617" stroke="${mainColor}" stroke-width="0.9" stroke-opacity="0.8" />
-        
+
         <!-- Electric Lightning Bolt (Power Glyph) -->
         <path d="M12.5 11 L9.5 14.5 H12 L11 18 L15 14 H12.5 L13.5 11 Z" fill="${mainColor}" />
-        
+
         <!-- Charging Cable Loop -->
         <path d="M19.5 11 C23.5 11 24.5 13.5 24.5 17 V21 C24.5 23.5 22.5 24 20 24" stroke="${mainColor}" stroke-width="1.6" stroke-linecap="round" fill="none" />
-        
+
         <!-- Charging Gun / Nozzle Handle in Holster -->
         <path d="M22 10.5 H25 C25.6 10.5 26 10.9 26 11.5 V14 C26 14.6 25.6 15 25 15 H22" fill="#090d16" stroke="${mainColor}" stroke-width="1.3" />
       </svg>
@@ -110,7 +110,7 @@ const createInspectedIcon = () => {
         border: 1.5px solid ${color};
         animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
       "></div>
-      
+
       <!-- Core Reticle / Pin -->
       <div style="
         position: relative;
@@ -153,9 +153,9 @@ interface Props {
   onInspectLocation?: (rto: Opportunity, distanceKm: number) => void;
 }
 
-function MapClickHandler({ 
-  onMapClick 
-}: { 
+function MapClickHandler({
+  onMapClick
+}: {
   onMapClick: (lat: number, lon: number) => void;
 }) {
   useMapEvents({
@@ -169,19 +169,24 @@ function MapClickHandler({
   return null;
 }
 
-function MapUpdater({ 
-  selectedId, 
+function MapUpdater({
+  selectedId,
   opportunities,
   selectedState,
   inspectedLocation
-}: { 
-  selectedId: string | null; 
+}: {
+  selectedId: string | null;
   opportunities: Opportunity[];
   selectedState?: string;
   inspectedLocation?: Opportunity | null;
 }) {
   const map = useMap();
   const isFirstRender = useRef(true);
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize());
+    observer.observe(map.getContainer());
+    return () => observer.disconnect();
+  }, [map]);
 
   useEffect(() => {
     // On initial mount, map already starts at whole India center [22.5937, 78.9629], zoom 5
@@ -216,10 +221,10 @@ function MapUpdater({
   return null;
 }
 
-export default function MapComponent({ 
-  opportunities, 
-  selectedId, 
-  onSelect, 
+export default function MapComponent({
+  opportunities,
+  selectedId,
+  onSelect,
   selectedState,
   inspectedLocation,
   onInspectLocation
@@ -236,27 +241,27 @@ export default function MapComponent({
   };
   return (
     <div className="h-full w-full relative z-0">
-      <MapContainer 
-        center={[22.5937, 78.9629]} 
-        zoom={5} 
-        scrollWheelZoom={true} 
+      <MapContainer
+        center={[22.5937, 78.9629]}
+        zoom={5}
+        scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", background: "#090d16" }}
         zoomControl={false}
       >
         {/* Dark Voyager Basemap */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_4fsm_1_429795fdad01e7f2e63e6b4c"
+          url="https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png?key=cb1_4fsm_1_429795fdad01e7f2e63e6b4c"
         />
 
         {/* Global Click Handler to Inspect Nearest RTO */}
         <MapClickHandler onMapClick={handleMapClick} />
-        
+
         {opportunities.map((opp) => {
           const isSelected = opp.id === selectedId;
           return (
-            <Marker 
-              key={opp.id} 
+            <Marker
+              key={opp.id}
               position={[opp.latitude, opp.longitude]}
               icon={createAttractiveIcon(opp.opportunityBand, isSelected)}
               eventHandlers={{
@@ -269,7 +274,7 @@ export default function MapComponent({
                     {opp.districtOrCity}, {opp.state}
                   </div>
                   <div className="font-bold text-sm text-white mb-2">{opp.name}</div>
-                  
+
                   <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-800 pt-2 mb-2">
                     <div>
                       <span className="text-slate-400 text-[10px]">Fleet Size:</span>
@@ -310,7 +315,7 @@ export default function MapComponent({
                 <div className="text-[10px] text-gray-400 mb-2">
                   Jurisdiction: {inspectedLocation.districtOrCity}, {inspectedLocation.state}
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-2 text-xs border-t border-slate-800 pt-2 mb-2">
                   <div>
                     <span className="text-slate-400 text-[10px]">EV Fleet:</span>
@@ -330,65 +335,16 @@ export default function MapComponent({
             </Popup>
           </Marker>
         )}
-        
-        <MapUpdater 
-          selectedId={selectedId} 
-          opportunities={opportunities} 
-          selectedState={selectedState} 
+
+        <MapUpdater
+          selectedId={selectedId}
+          opportunities={opportunities}
+          selectedState={selectedState}
           inspectedLocation={inspectedLocation}
         />
       </MapContainer>
-      
-      {/* High-Tech Opportunity Map Legend */}
-      <div className="absolute bottom-5 left-5 z-[400] bg-black/90 backdrop-blur-md border border-gray-800/80 p-3 rounded-lg text-xs shadow-2xl max-w-xs">
-        <h4 className="font-bold text-gray-300 mb-2 uppercase tracking-widest text-[10px] flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3687a9] animate-pulse"></span>
-          Opportunity Hotspot Tiers
-        </h4>
-        <div className="flex items-center gap-2.5 mb-2">
-          <svg width="14" height="18" viewBox="0 0 28 35" fill="none" className="shrink-0" style={{ filter: "drop-shadow(0 0 4px #3687a9)" }}>
-            <path d="M10 29.5 L14 34 L18 29.5 Z" fill="#3687a9" />
-            <rect x="3" y="27" width="18" height="3" rx="1.5" fill="#3687a9" />
-            <rect x="4.5" y="3.5" width="15" height="24" rx="3.5" fill="#090d16" stroke="#3687a9" strokeWidth="1.8" />
-            <circle cx="12" cy="6.5" r="1.3" fill="#3687a9" />
-            <rect x="7" y="10" width="10" height="9" rx="1.5" fill="#020617" stroke="#3687a9" strokeWidth="0.9" />
-            <path d="M12.5 11 L9.5 14.5 H12 L11 18 L15 14 H12.5 L13.5 11 Z" fill="#3687a9" />
-            <path d="M19.5 11 C23.5 11 24.5 13.5 24.5 17 V21 C24.5 23.5 22.5 24 20 24" stroke="#3687a9" strokeWidth="1.6" strokeLinecap="round" />
-            <path d="M22 10.5 H25 C25.6 10.5 26 10.9 26 11.5 V14 C26 14.6 25.6 15 25 15 H22" fill="#090d16" stroke="#3687a9" strokeWidth="1.3" />
-          </svg>
-          <span className="font-semibold text-white">Tier 1: High Conviction (Score ≥ 65)</span>
-        </div>
-        <div className="flex items-center gap-2.5 mb-2">
-          <svg width="14" height="18" viewBox="0 0 28 35" fill="none" className="shrink-0" style={{ filter: "drop-shadow(0 0 4px #00f5d4)" }}>
-            <path d="M10 29.5 L14 34 L18 29.5 Z" fill="#00f5d4" />
-            <rect x="3" y="27" width="18" height="3" rx="1.5" fill="#00f5d4" />
-            <rect x="4.5" y="3.5" width="15" height="24" rx="3.5" fill="#090d16" stroke="#00f5d4" strokeWidth="1.8" />
-            <circle cx="12" cy="6.5" r="1.3" fill="#00f5d4" />
-            <rect x="7" y="10" width="10" height="9" rx="1.5" fill="#020617" stroke="#00f5d4" strokeWidth="0.9" />
-            <path d="M12.5 11 L9.5 14.5 H12 L11 18 L15 14 H12.5 L13.5 11 Z" fill="#00f5d4" />
-            <path d="M19.5 11 C23.5 11 24.5 13.5 24.5 17 V21 C24.5 23.5 22.5 24 20 24" stroke="#00f5d4" strokeWidth="1.6" strokeLinecap="round" />
-            <path d="M22 10.5 H25 C25.6 10.5 26 10.9 26 11.5 V14 C26 14.6 25.6 15 25 15 H22" fill="#090d16" stroke="#00f5d4" strokeWidth="1.3" />
-          </svg>
-          <span className="text-gray-300">Tier 2: Medium Growth (Score 58–64)</span>
-        </div>
-        <div className="flex items-center gap-2.5 mb-2">
-          <svg width="14" height="18" viewBox="0 0 28 35" fill="none" className="shrink-0" style={{ filter: "drop-shadow(0 0 4px #a78bfa)" }}>
-            <path d="M10 29.5 L14 34 L18 29.5 Z" fill="#a78bfa" />
-            <rect x="3" y="27" width="18" height="3" rx="1.5" fill="#a78bfa" />
-            <rect x="4.5" y="3.5" width="15" height="24" rx="3.5" fill="#090d16" stroke="#a78bfa" strokeWidth="1.8" />
-            <circle cx="12" cy="6.5" r="1.3" fill="#a78bfa" />
-            <rect x="7" y="10" width="10" height="9" rx="1.5" fill="#020617" stroke="#a78bfa" strokeWidth="0.9" />
-            <path d="M12.5 11 L9.5 14.5 H12 L11 18 L15 14 H12.5 L13.5 11 Z" fill="#a78bfa" />
-            <path d="M19.5 11 C23.5 11 24.5 13.5 24.5 17 V21 C24.5 23.5 22.5 24 20 24" stroke="#a78bfa" strokeWidth="1.6" strokeLinecap="round" />
-            <path d="M22 10.5 H25 C25.6 10.5 26 10.9 26 11.5 V14 C26 14.6 25.6 15 25 15 H22" fill="#090d16" stroke="#a78bfa" strokeWidth="1.3" />
-          </svg>
-          <span className="text-gray-400">Tier 3: Emerging / Low (Score &lt; 58)</span>
-        </div>
-        <div className="pt-2 border-t border-gray-800 text-[10px] text-rose-300/90 flex items-center gap-1.5 font-medium">
-          <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
-          <span>Click anywhere on map to inspect nearest RTO insights</span>
-        </div>
-      </div>
+
+      <div className="investor-map-legend"><div><span><i style={{background:'#71e2b3'}} />High · 65+</span><span><i style={{background:'#75c7c4'}} />Medium · 58–64</span><span><i style={{background:'#a78bfa'}} />Emerging · &lt;58</span></div><p>Select a station or click the map to explore a location.</p></div>
     </div>
   );
 }

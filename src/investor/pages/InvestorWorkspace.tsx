@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { ArrowLeft, Filter, Sparkles, Database } from "lucide-react";
+import { ArrowLeft, Filter, Sun, X, ArrowUpRight } from "lucide-react";
 import { opportunityService, FilterState } from "../services/opportunityService";
 import { Opportunity } from "../types";
+import "../investor.css";
 
 import MapComponent from "../components/MapComponent";
 import FilterPanel from "../components/FilterPanel";
@@ -23,6 +24,7 @@ export default function InvestorWorkspace({ onBack }: InvestorWorkspaceProps) {
     opportunityLevel: "All",
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     opportunityService.getOpportunities(filters).then(data => {
@@ -31,10 +33,22 @@ export default function InvestorWorkspace({ onBack }: InvestorWorkspaceProps) {
     });
   }, [filters]);
 
+  // Real-time instant search filter across name, district and state
+  const displayedOpportunities = opportunities.filter(opp => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      opp.name.toLowerCase().includes(q) ||
+      opp.districtOrCity.toLowerCase().includes(q) ||
+      opp.state.toLowerCase().includes(q)
+    );
+  });
+
   // Global Escape key listener: deselect and return to whole India view
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        setIsFilterOpen(false);
         setSelectedLocationId(null);
         setInspectedLocation(null);
       }
@@ -56,69 +70,54 @@ export default function InvestorWorkspace({ onBack }: InvestorWorkspaceProps) {
 
   // Only active when a location is explicitly selected
   const selectedLocation = selectedLocationId
-    ? (opportunities.find(o => o.id === selectedLocationId) || 
+    ? (opportunities.find(o => o.id === selectedLocationId) ||
        (inspectedLocation && inspectedLocation.id === selectedLocationId ? inspectedLocation : null))
     : null;
 
   const isInspected = Boolean(
-    inspectedLocation && 
-    selectedLocation?.id === inspectedLocation.id && 
+    inspectedLocation &&
+    selectedLocation?.id === inspectedLocation.id &&
     !opportunities.some(o => o.id === inspectedLocation.id)
   );
 
   return (
-    <div className="flex flex-col h-screen bg-black text-white font-sans overflow-hidden">
-      {/* Header */}
-      <header className="border-b border-gray-800 px-4 py-2.5 flex items-center justify-between shrink-0 bg-black/90 backdrop-blur z-30">
-        <div className="flex items-center gap-3.5">
-          <button 
-            type="button"
-            onClick={onBack} 
-            className="text-gray-400 hover:text-white transition-colors p-1 cursor-pointer"
-            title="Back to Landing Page"
-            aria-label="Back to Landing Page"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <div className="text-[10px] uppercase tracking-widest text-brand-accent font-extrabold flex items-center gap-1.5">
-              <span> Investor's Workspace</span>
-              
-            </div>
-            <h1 className="text-base font-bold leading-none text-white">EV ChargePoint </h1>
-          </div>
-        </div>
+    <div className="investor-workspace">
+      <header className="investor-header">
+        <div className="investor-brand"><Sun size={25} /><span>Surya<span>Ease</span></span><span className="investor-brand-divider" /><span className="investor-eyebrow">Investor workspace</span></div>
+        <button type="button" onClick={onBack} className="investor-home"><ArrowLeft size={15} /><span>Back to home</span></button>
       </header>
+      <section className="investor-intro">
+        <div><p className="investor-eyebrow">EV CHARGING · OPPORTUNITY EXPLORER</p><h1>Find where the future charges.</h1><p>Explore high-potential locations for your next clean energy investment.</p></div>
+        <div className="investor-summary"><span>Discovery coverage</span><strong>{opportunities.length}<small> investment zones</small></strong><span className="investor-source"><span /> VAHAN registry data <ArrowUpRight size={13} /></span></div>
+      </section>
 
       {/* Main Layout Area */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="investor-layout">
         {/* Left Side: Filter Controls & Ranked Hotspots List */}
-        <aside className={`w-84 border-r border-gray-800 bg-black flex flex-col shrink-0 absolute md:relative z-20 h-full transition-transform ${isFilterOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-          <div className="p-3 border-b border-gray-800 flex justify-between items-center bg-gray-950/90">
-            <h2 className="font-bold text-xs uppercase tracking-widest text-gray-300">Hotspot Discovery</h2>
-            <button className="md:hidden text-gray-400" onClick={() => setIsFilterOpen(false)}>✕</button>
-          </div>
-          
-          <FilterPanel 
-            filters={filters} 
-            onChange={setFilters} 
-            resultCount={opportunities.length}
+        <aside className={`investor-sidebar ${isFilterOpen ? 'is-open' : ''}`}>
+          <div className="investor-panel-heading"><div><p className="investor-eyebrow">DISCOVER</p><h2>Investment opportunities</h2></div><button className="investor-mobile-close" aria-label="Close opportunities" onClick={() => setIsFilterOpen(false)}><X size={20} /></button></div>
+          <FilterPanel
+            filters={filters}
+            onChange={setFilters}
+            resultCount={displayedOpportunities.length}
             onReset={handleReset}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
-          
-          <div className="flex-1 overflow-y-auto">
-            <OpportunityList 
-              opportunities={opportunities} 
+
+          <div className="investor-results">
+            <OpportunityList
+              opportunities={displayedOpportunities}
               selectedId={selectedLocationId}
-              onSelect={setSelectedLocationId}
+              onSelect={(id) => { setSelectedLocationId(id); setIsFilterOpen(false); }}
             />
           </div>
         </aside>
 
         {/* Center Map Area */}
-        <main className="flex-1 relative bg-[#090d16]">
-          <MapComponent 
-            opportunities={opportunities} 
+        <main className="investor-map">
+          <MapComponent
+            opportunities={displayedOpportunities}
             selectedId={selectedLocationId}
             onSelect={(id) => {
               setSelectedLocationId(id);
@@ -133,21 +132,22 @@ export default function InvestorWorkspace({ onBack }: InvestorWorkspaceProps) {
               setSelectedLocationId(rto.id);
             }}
           />
-          
+
           {/* Mobile Filter Toggle */}
-          <button 
-            className="md:hidden absolute top-4 left-4 z-[400] bg-black border border-gray-700 p-2.5 rounded-lg shadow-lg text-white"
+          <button
+            className="investor-mobile-toggle"
+            aria-label="Show opportunities and filters"
             onClick={() => setIsFilterOpen(true)}
           >
-            <Filter size={18} />
+            <Filter size={16} /> Explore locations
           </button>
         </main>
 
         {/* Right Side: Selected Zone Intelligence & Auto Station Sizing */}
         {selectedLocation && (
-          <aside className="w-full md:w-[420px] border-l border-gray-800 bg-black flex flex-col shrink-0 absolute md:relative z-30 h-full right-0 shadow-2xl">
-            <LocationDetails 
-              location={selectedLocation} 
+          <aside className="investor-details">
+            <LocationDetails
+              location={selectedLocation}
               onClose={() => {
                 setSelectedLocationId(null);
                 setInspectedLocation(null);

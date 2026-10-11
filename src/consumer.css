@@ -1,0 +1,103 @@
+/* Restore Tailwind's spacing where the legacy unlayered reset removed it. */
+:is(.solar-page, .auth-page, nav) :where(*) { margin: revert-layer; padding: revert-layer; }
+:where(button) { padding: revert-layer; margin: revert-layer; }
+button { transition: background-color .18s, border-color .18s, color .18s, box-shadow .18s; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #78e4b5; outline-offset: 3px; }
+button:disabled { cursor: not-allowed; opacity: .5; }
+:is(.solar-page, .auth-page, nav) button:not(.leaflet-marker-icon) { border-radius: 10px; font-weight: 600; letter-spacing: 0; box-shadow: none; }
+:is(.solar-page, .auth-page, nav) button:hover { scale: 1; transform: none; }
+:is(.solar-page, .auth-page) button:not(.leaflet-marker-icon):not([class*='w-']):not([class*='rounded-full']) { min-height: 38px; }
+:is(.solar-page,.auth-page) input:not([type=range]), :is(.solar-page,.auth-page) select { min-width: 0; }
+.solar-page .consumer-app { background: #09120e; }
+.consumer-app h1, .consumer-app h2, .auth-page h1 { font-weight: 550; letter-spacing: -.6px; }
+.consumer-app [class*='bg-slate-900'] { background-color: #122019; }
+.consumer-app [class*='bg-slate-950'] { background-color: #0b1510; }
+.consumer-app [class*='shadow-'] { box-shadow: none; }
+.consumer-app [class*='rounded-3xl'] { border-radius: 18px; }
+.consumer-app [class*='font-black'] { font-weight: 600; }
+.consumer-app [class*='text-slate-400'] { color: #a0b3a8; }
+.consumer-app > main { min-height: 0; }
+.consumer-app .solar-report { overflow-y: auto; gap: 24px; padding: 28px; }
+.solar-report > div { flex-shrink: 0; }
+.auth-page { overflow-y: auto; height: 100%; min-height: 0; background: radial-gradient(ellipse at 20% 40%,#16462b55,transparent 55%),#09120e; }
+.auth-page > header { padding: 24px 32px; flex-shrink: 0; }
+.auth-page > main { padding: 24px 20px 40px; }
+.auth-page > main > div { max-width: 460px; }
+.auth-page > main > div > div { background: #122019ee; border: 1px solid #ffffff14; border-radius: 22px; padding: 32px; box-shadow: 0 20px 80px #0003; }
+.auth-page > main > div > div > div:first-of-type + div { opacity: .2; }
+.auth-page input { user-select: text; }
+.auth-page form input { min-height: 46px; }
+.auth-page form > div.pt-6 { padding-top: 6px; }
+.auth-page footer { padding: 18px; font-size: 11px; }
+.auth-page .animate-pulse { animation: none; opacity: .3; }
+.auth-page form button[type=submit] { background: #78e4b5; color: #10251a; }
+.consumer-title { margin-bottom: 28px; }
+.consumer-title .eyebrow { color: #7de1b4; font-size: 10px; font-weight: 600; letter-spacing: 1.8px; margin-bottom: 12px; }
+.consumer-title h1 { font-size: clamp(25px,3vw,36px); line-height: 1.2; margin-bottom: 10px; }
+.consumer-title > p:last-child { color: #a0b3a8; font-size: 13px; line-height: 1.7; }
+.solar-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 17px; min-height: 44px; border: 1px solid #ffffff24; border-radius: 10px; background: #ffffff04; color: #d7e6dc; font-size: 12px; font-weight: 600; cursor: pointer; }
+.solar-button:hover { background: #ffffff0c; border-color: #78e4b566; }
+.solar-button.primary { background: #78e4b5; border-color: #78e4b5; color: #0c281a; }
+.solar-button.primary:hover { background: #98edc8; }
+.solar-button.quiet { padding-left: 0; border-color: transparent; background: none; }
+.consumer-card { padding: 28px; border: 1px solid #ffffff12; border-radius: 18px; background: #122019; }
+.energy-step { max-width: 1140px; width: 100%; margin: 0 auto; padding: 16px; }
+.energy-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; }
+.energy-inputs h2 { font-size: 19px; margin-bottom: 30px; }
+.energy-field { margin-bottom: 28px; }
+.energy-field:last-child { margin-bottom: 0; }
+.energy-field label { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13px; color: #b0c3b7; margin-bottom: 16px; }
+.energy-field label strong { font-size: 21px; font-weight: 500; color: #eef8f1; }
+.energy-field p { color: #93ab9c; font-size: 11px; line-height: 1.6; margin-top: 12px; }
+.energy-field input[type=range] { width: 100%; accent-color: #78e4b5; cursor: pointer; }
+.energy-field input[type=number] { width: 100%; max-width: 140px; padding: 12px 14px; background: #09140d; color: white; border: 1px solid #ffffff20; border-radius: 9px; }
+.bill-presets { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 16px; }
+.bill-presets button { padding: 10px 6px; border: 1px solid #ffffff16; color: #adbdaf; background: #0c1710; font-size: 12px; }
+.bill-presets button[aria-pressed=true] { color: #8ce6b8; border-color: #78e4b566; background: #78e4b510; }
+.energy-projection { background: radial-gradient(ellipse at top right,#24523a55,transparent 65%),#122019; }
+.projection-label { display: flex; align-items: center; gap: 10px; color: #8be1b7; font-size: 10px; letter-spacing: 1.5px; }
+.capacity-number { font-size: 76px; line-height: 1.2; letter-spacing: -4px; font-weight: 500; margin: 22px 0 10px; }
+.capacity-number span { font-size: 26px; letter-spacing: 0; color: #a2bcab; margin-left: 8px; }
+.energy-projection > p { font-size: 12px; color: #a5bcae; line-height: 1.7; }
+.energy-projection dl { margin: 24px 0; }
+.energy-projection dl > div { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #ffffff10; font-size: 12px; }
+.energy-projection dt { color: #a0b3a8; }.energy-projection dd { color: #d4f2df; font-weight: 600; }
+.energy-projection .projection-note { font-size: 10px; }
+.consumer-step-actions { display: flex; justify-content: space-between; gap: 16px; margin-top: 26px; padding-top: 20px; border-top: 1px solid #ffffff12; }
+.vendor-market { width: 100%; max-width: 1500px; margin: 0 auto; padding: 24px 32px 100px; overflow-y: auto; }
+.consumer-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.demo-label { font-size: 10px; letter-spacing: 1.5px; color: #aee7c4; background: #78e4b510; border: 1px solid #78e4b52a; padding: 7px 10px; border-radius: 6px; }
+.plan-summary { display: grid; grid-template-columns: repeat(4,1fr); border: 1px solid #ffffff15; border-radius: 14px; padding: 20px; background: #132019; gap: 20px; }
+.plan-summary > div { display: flex; flex-direction: column; gap: 8px; }.plan-summary span { color: #9cb1a3; font-size: 11px; }.plan-summary strong { font-size: 17px; font-weight: 500; }
+.demo-notice { font-size: 12px; color: #a2b8ab; line-height: 1.7; margin: 18px 0 28px; max-width: 920px; }
+.vendor-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; font-size: 12px; color: #b0c1b6; }
+.vendor-toolbar select { margin-left: 10px; padding: 9px 12px; color: #d4e5d9; border: 1px solid #ffffff20; background: #15231a; border-radius: 8px; }
+.vendor-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
+.vendor-card { display: flex; flex-direction: column; padding: 24px; border: 1px solid #ffffff16; background: #122019; border-radius: 18px; transition: border-color .2s; min-width: 0; }.vendor-card:hover { border-color: #78e4b54a; }
+.vendor-heading { display: flex; gap: 10px; align-items: center; }.vendor-heading h2 { font-size: 16px; margin-bottom: 5px; }.vendor-heading p { font-size: 10px; color: #9eb2a6; line-height: 1.5; }.vendor-monogram { flex-shrink: 0; width: 36px; height: 36px; display: grid; place-items: center; background: #78e4b512; border: 1px solid #78e4b523; border-radius: 10px; color: #85deb1; font-size: 11px; }.vendor-rating { margin-left: auto; display: flex; gap: 4px; align-items: center; font-size: 11px; color: #e7c880; white-space: nowrap; }
+.vendor-area { display: flex; gap: 6px; color: #96b3a0; font-size: 11px; margin: 18px 0; }
+.vendor-specs > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #ffffff0a; font-size: 11px; line-height: 1.5; }.vendor-specs dt { color: #95aa9d; flex-shrink: 0; }.vendor-specs dd { text-align: right; color: #cfdfd4; }
+.vendor-price { margin-top: 22px; }.vendor-price > span { font-size: 11px; color: #a0b7a8; }.vendor-price > strong { display: block; font-size: 30px; font-weight: 500; margin: 5px 0 16px; letter-spacing: -.8px; }.vendor-price > div { display: flex; justify-content: space-between; gap: 10px; font-size: 10px; color: #9fb8a8; margin: 7px 0; }
+.vendor-fineprint { color: #8da697; font-size: 10px; line-height: 1.7; margin: 12px 0 20px; }
+.vendor-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }.vendor-actions .solar-button { font-size: 11px; padding: 11px 8px; }
+.vendor-counter { margin-top: auto; }.vendor-counter label { font-size: 12px; color: #b6cfc0; }.vendor-counter input { width: 100%; border: 1px solid #78e4b54a; padding: 12px; border-radius: 9px; margin: 10px 0; color: white; background: #0a160f; }.vendor-counter p { color: #fca5a5; font-size: 11px; margin-bottom: 12px; }.vendor-feedback { display: flex; align-items: start; gap: 6px; padding: 12px; border-radius: 8px; background: #78e4b510; color: #9ce6ba; font-size: 11px; line-height: 1.5; margin-bottom: 16px; }.vendor-feedback svg { flex-shrink: 0; }
+.consumer-empty { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 60px 20px; text-align: center; }
+@media(max-width:1150px) { .vendor-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:767px) { .energy-grid,.vendor-grid { grid-template-columns: 1fr; }.energy-step { padding: 6px; }.consumer-card { padding: 22px; }.vendor-market { padding: 20px 16px 100px; }.plan-summary { grid-template-columns: 1fr 1fr; }.vendor-toolbar { align-items: start; flex-direction: column; }.consumer-step-actions { flex-wrap: wrap; }.consumer-step-actions button { flex: 1; }.auth-page > header { padding: 20px; }.auth-page > main > div > div { padding: 26px 22px; }.consumer-app .solar-report { padding: 16px; }.solar-report > div:last-child { display: flex; flex-direction: column; }.auth-page > main { align-items: flex-start; }.consumer-title h1 { font-size: 26px; } }
+@media(prefers-reduced-motion:reduce) { :is(.consumer-app,.auth-page) * { animation: none!important; transition: none!important; } }
+nav { padding: revert-layer; }
+.solar-wizard { display: flex; flex-direction: column; height: 100%; min-height: 0; width: 100%; max-width: 1480px; margin: 0 auto; padding: 18px 24px 24px; }
+.wizard-progress { display: flex; justify-content: center; gap: 28px; list-style: none; padding: 0 0 22px; flex-shrink: 0; }
+.wizard-progress button { display: flex; align-items: center; gap: 9px; padding: 8px 10px; background: transparent; border: 0; color: #8ca797; font-size: 12px; }
+.wizard-progress button > span { width: 27px; height: 27px; display: grid; place-items: center; background: #182b20; border-radius: 50%; font-size: 10px; }
+.wizard-progress button[aria-current=step] { color: #a3efc7; }.wizard-progress button[aria-current=step] > span { background: #78e4b5; color: #10311e; }
+.wizard-content { flex: 1; min-height: 0; overflow-y: auto; border: 1px solid #ffffff12; border-radius: 18px; padding: 24px; background: #ffffff02; }
+@media(max-width:767px) { .solar-wizard { padding: 10px 12px 16px; }.wizard-content { padding: 14px; }.wizard-progress { gap: 4px; padding-bottom: 10px; }.wizard-progress button { font-size: 11px; padding: 6px; } }
+/* The solar app already has a Home action; hide its duplicate View Demo action. */
+nav:has(+ .solar-page) > div:last-child > button:last-child { display: none; }
+@media(max-width:767px) {
+  nav { padding: 8px 14px; }
+  nav > div:last-child { gap: 6px; }
+  nav button { white-space: nowrap; padding: 9px 12px; font-size: 11px; }
+  nav > div:first-child { font-size: 18px; }
+}

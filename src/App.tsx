@@ -34,25 +34,25 @@ export default function App() {
   };
 
   return (
-    <div className="w-full bg-[#050907] font-sans">
+    <div className="w-full h-screen overflow-hidden bg-[#050907] font-sans flex flex-col">
       {/* Global Navigation — shown on 3D hero page and solar app page */}
       {currentRoute !== 'login' && currentRoute !== 'investor' && (
         <nav className={`${
-          currentRoute === 'home' ? 'fixed top-0 left-0 right-0' : 'sticky top-0'
+          currentRoute === 'home' ? 'fixed top-0 left-0 right-0' : 'relative shrink-0'
         } z-[9999] px-4 sm:px-6 py-2.5 flex justify-between items-center bg-[#050907]/95 backdrop-blur-md border-b border-white/10 h-14`}>
           <div
             className="flex items-center space-x-2 text-white font-bold text-xl cursor-pointer select-none"
             onClick={() => setCurrentRoute('home')}
           >
             <Sun className="text-amber-400 w-6 h-6" />
-            <span>Surya<span className="text-emerald-400">Punk</span></span>
+            <span>Surya<span className="text-emerald-400">Ease</span></span>
           </div>
 
           <div className="flex items-center gap-3">
             {currentRoute === 'app' && (
               <button
                 onClick={() => setCurrentRoute('home')}
-                className="text-slate-400 hover:text-white text-sm transition-colors cursor-pointer"
+                className="text-slate-300 hover:text-white text-sm font-semibold transition-all cursor-pointer px-4 py-2 rounded-xl border border-white/10 hover:border-white/25 bg-slate-900/70 hover:bg-slate-800 shadow-sm hover:scale-105 active:scale-95"
               >
                 ← Home
               </button>
@@ -61,7 +61,7 @@ export default function App() {
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
-                className="text-xs text-slate-400 hover:text-rose-400 transition-colors cursor-pointer px-2.5 py-1 rounded-lg border border-white/10 hover:border-rose-500/20"
+                className="text-xs sm:text-sm text-slate-300 hover:text-rose-400 font-semibold transition-all cursor-pointer px-4 py-2 rounded-xl border border-white/10 hover:border-rose-500/40 bg-slate-900/70 hover:bg-rose-500/10 shadow-sm hover:scale-105 active:scale-95"
                 title="Sign out of your session"
               >
                 Sign Out
@@ -76,7 +76,7 @@ export default function App() {
                   setCurrentRoute('home');
                 }
               }}
-              className="bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 px-5 py-2 rounded-full text-sm font-bold hover:bg-emerald-500/30 transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              className="bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 px-6 py-2.5 rounded-full text-sm font-bold hover:bg-emerald-500/35 transition-all cursor-pointer shadow-md shadow-emerald-500/20 hover:scale-105 active:scale-95 hover:shadow-emerald-500/40"
             >
               {currentRoute === 'home' 
                 ? (isAuthenticated ? 'Open Platform' : 'Sign In / Proceed') 
@@ -96,10 +96,10 @@ export default function App() {
           <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-40">
             <button
               onClick={handleProceed}
-              className="px-8 py-4 bg-gradient-to-r from-emerald-500 to-lime-500 text-slate-900 rounded-full font-bold text-lg shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] transition-all transform hover:-translate-y-1 flex items-center cursor-pointer"
+              className="px-10 py-4 bg-gradient-to-r from-emerald-500 to-lime-500 text-slate-900 rounded-full font-black text-lg tracking-wide shadow-[0_0_36px_rgba(16,185,129,0.4)] hover:shadow-[0_0_60px_rgba(16,185,129,0.6)] transition-all transform hover:-translate-y-1.5 active:translate-y-0 hover:scale-105 flex items-center gap-3 cursor-pointer"
             >
               Start Your Solar Journey
-              <span className="ml-2 text-2xl leading-none">→</span>
+              <span className="text-2xl leading-none">→</span>
             </button>
           </div>
         </div>
@@ -114,8 +114,8 @@ export default function App() {
       )}
 
       {currentRoute === 'app' && (
-        /* Individual Solar sizing & assessment platform — full scrollable page */
-        <div className="solar-page">
+        /* Individual Solar assessment platform — non-scrolling single viewport view */
+        <div className="solar-page flex-1 h-[calc(100vh-56px)] overflow-hidden">
           <SolarApp />
         </div>
       )}

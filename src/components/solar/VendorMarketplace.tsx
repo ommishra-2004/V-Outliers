@@ -1,139 +1,71 @@
-import React, { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, MapPin, Star, Sun } from 'lucide-react';
 import { useSolarStore } from '../../store/solarStore';
-import { getVendorQuotes } from '../../services/api';
-import { Star, Shield, ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
+import { createDemoVendorQuotes } from '../../services/demoVendors';
 
-interface VendorMarketplaceProps {
-  onBack: () => void;
-  onReset?: () => void;
-}
+interface VendorMarketplaceProps { onBack: () => void; onReset?: () => void; }
+const money = (value: number) => `₹${Math.round(value).toLocaleString('en-IN')}`;
 
 export default function VendorMarketplace({ onBack, onReset }: VendorMarketplaceProps) {
-  const { analysisResult, vendorQuotes, setVendorQuotes } = useSolarStore();
-  const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'price' | 'rating' | 'speed'>('price');
+  const { analysisResult, siteInput } = useSolarStore();
+  const [sort, setSort] = useState('price');
+  const [counterId, setCounterId] = useState<string | null>(null);
+  const [amount, setAmount] = useState('');
+  const [feedback, setFeedback] = useState<Record<string, string>>({});
+  const [error, setError] = useState('');
+  const quotes = useMemo(() => analysisResult ? createDemoVendorQuotes(analysisResult, siteInput) : [], [analysisResult, siteInput]);
+  const sorted = [...quotes].sort((a, b) => sort === 'rating' ? b.rating - a.rating : sort === 'speed' ? a.days - b.days : a.total - b.total);
 
-  useEffect(() => {
-    if (analysisResult) {
-      getVendorQuotes(analysisResult.analysis_id).then(quotes => {
-        setVendorQuotes(quotes);
-        setLoading(false);
-      });
-    }
-  }, [analysisResult, setVendorQuotes]);
-
-  const sortedQuotes = [...vendorQuotes].sort((a, b) => {
-    if (sortBy === 'price') return a.total_price - b.total_price;
-    if (sortBy === 'rating') return b.rating - a.rating;
-    if (sortBy === 'speed') return a.installation_days - b.installation_days;
-    return 0;
-  });
-
-  const fmt = (num: number) => new Intl.NumberFormat('en-IN').format(num);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96">
-        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin mb-4" />
-        <p className="text-slate-400">Fetching live quotes from certified vendors...</p>
-      </div>
-    );
-  }
+  if (!analysisResult) return <div className="consumer-empty"><Sun size={32} /><h1>Start with your solar plan</h1><p>Complete an assessment to see prices tailored to your rooftop.</p><button className="solar-button primary" onClick={onReset || onBack}>Start assessment</button></div>;
 
   return (
-    <div className="max-w-[1720px] 2xl:max-w-[1840px] mx-auto w-full pt-4 sm:pt-6 pb-20 px-3 sm:px-6 lg:px-8 xl:px-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-white/10 pb-6 mb-8 gap-4">
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <button onClick={onBack} className="flex items-center text-slate-400 hover:text-white transition-colors text-xs sm:text-sm font-semibold cursor-pointer">
-              <ArrowLeft className="w-4 h-4 mr-1 text-emerald-400" /> Back to Report
-            </button>
-            {onReset && (
-              <>
-                <span className="text-slate-600">|</span>
-                <button onClick={onReset} className="text-slate-400 hover:text-emerald-400 transition-colors text-xs sm:text-sm cursor-pointer">
-                  New Assessment
-                </button>
-              </>
-            )}
-          </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight mb-1">Verified Indian Vendor Quotes</h1>
-          <p className="text-slate-400 text-xs sm:text-sm">Reverse-auction competitive bids for your {analysisResult?.recommended_capacity_kw} kW rooftop system</p>
-        </div>
-        
-        <div className="mt-4 md:mt-0 flex gap-2">
-          {['price', 'rating', 'speed'].map((type) => (
-            <button
-              key={type}
-              onClick={() => setSortBy(type as any)}
-              className={`px-4.5 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all capitalize ${
-                sortBy === type 
-                  ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400 shadow-md shadow-emerald-500/20 scale-105' 
-                  : 'bg-slate-900 text-slate-300 border border-white/10 hover:bg-slate-800 hover:text-white'
-              } hover:scale-102 active:scale-98`}
-            >
-              Sort by {type}
-            </button>
-          ))}
-        </div>
+    <section className="vendor-market">
+      <header className="consumer-page-header">
+        <button className="solar-button quiet" onClick={onBack}><ArrowLeft size={16} /> Back to report</button>
+        <span className="demo-label">INTERACTIVE DEMO</span>
+      </header>
+      <div className="consumer-title"><p className="eyebrow">YOUR SOLAR PLAN · NEXT STEPS</p><h1>A brighter choice for your rooftop.</h1><p>Compare installation packages tailored to the assessment you just completed.</p></div>
+      <div className="plan-summary">
+        <div><span>Recommended system</span><strong>{analysisResult.recommended_capacity_kw} kW</strong></div>
+        <div><span>Location</span><strong>{siteInput.city || siteInput.state || 'Selected rooftop'}</strong></div>
+        <div><span>Monthly electricity bill</span><strong>{money(siteInput.monthlyBill || 0)}</strong></div>
+        <div><span>Rooftop area</span><strong>{siteInput.roofAreaSqft?.toLocaleString('en-IN')} sq ft</strong></div>
       </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedQuotes.map((quote) => (
-          <div key={quote.quote_id} className="bg-slate-900/50 border border-white/10 rounded-3xl p-6 hover:border-emerald-500/50 transition-all group flex flex-col">
-            
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-white">{quote.vendor_name}</h3>
-                <div className="flex items-center mt-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < Math.floor(quote.rating) ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`} />
-                  ))}
-                  <span className="text-slate-300 text-sm ml-2">{quote.rating}</span>
-                </div>
-              </div>
-              {quote.subsidy_inclusive && (
-                <span className="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-1 rounded-md border border-emerald-500/20">
-                  Subsidy Incl.
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-3 mb-6 flex-grow">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Panels</span>
-                <span className="text-white font-medium">{quote.panel_brand}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Inverter</span>
-                <span className="text-white font-medium">{quote.inverter_type}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Timeline</span>
-                <span className="text-white font-medium">{quote.installation_days} Days</span>
-              </div>
-              <div className="flex items-center text-sm text-lime-400 pt-2">
-                <Shield className="w-4 h-4 mr-2" />
-                {quote.warranty_years} Years Warranty
-              </div>
-            </div>
-
-            <div className="border-t border-white/10 pt-4 mb-6">
-              <span className="text-slate-400 text-sm block mb-1">Total Net Price</span>
-              <span className="text-3xl font-bold text-white">₹{fmt(quote.total_price)}</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mt-auto">
-              <button className="py-3.5 rounded-2xl text-sm font-bold border border-white/20 text-white hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                Counter Offer
-              </button>
-              <button className="py-3.5 rounded-2xl text-sm font-black bg-gradient-to-r from-emerald-500 to-lime-500 text-slate-950 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all shadow-lg flex items-center justify-center hover:scale-[1.02] active:scale-[0.98]">
-                <CheckCircle className="w-4 h-4 mr-1.5 stroke-[2.5]" /> Accept Bid
-              </button>
-            </div>
-          </div>
+      <p className="demo-notice">Fictional vendors, sample ratings and illustrative prices. Accepting or countering a bid only updates this demo; no vendor is contacted and no payment is made.</p>
+      <div className="vendor-toolbar"><span>{quotes.length} packages for your {siteInput.propertyType?.toLowerCase() || 'residential'} property</span><label>Sort by <select value={sort} onChange={e => setSort(e.target.value)}><option value="price">Lowest price</option><option value="rating">Sample rating</option><option value="speed">Installation time</option></select></label></div>
+      <div className="vendor-grid">
+        {sorted.map(quote => (
+          <article className="vendor-card" key={quote.id}>
+            <div className="vendor-heading"><div className="vendor-monogram">{quote.name.split(' ').map(word => word[0]).join('')}</div><div><h2>{quote.name}</h2><p>{quote.specialty}</p></div><span className="vendor-rating"><Star size={13} /> {quote.rating}</span></div>
+            <p className="vendor-area"><MapPin size={14} />{quote.serviceArea}</p>
+            <dl className="vendor-specs">
+              <div><dt>Solar panels</dt><dd>{quote.panelsCount} × {quote.panels}</dd></div>
+              <div><dt>Inverter</dt><dd>{quote.inverter}</dd></div>
+              <div><dt>Installation</dt><dd>About {quote.days} days</dd></div>
+              <div><dt>Panel performance</dt><dd>25-year demo warranty</dd></div>
+              <div><dt>Aftercare</dt><dd>{quote.support}</dd></div>
+              <div><dt>Specialisation</dt><dd>{quote.experience}</dd></div>
+            </dl>
+            <div className="vendor-price"><span>Estimated net investment</span><strong>{money(quote.total)}</strong><div><span>Installed package</span><span>{money(quote.gross)}</span></div><div><span>Assessment subsidy estimate</span><span>− {money(quote.subsidy)}</span></div></div>
+            <p className="vendor-fineprint">Package priced at {Math.round(quote.factor * 100)}% of your report’s installed cost. Subsidy is an estimate, subject to eligibility. Battery not included.</p>
+            {feedback[quote.id] && <p className="vendor-feedback" role="status"><Check size={16} />{feedback[quote.id]}</p>}
+            {counterId === quote.id ? (
+              <form className="vendor-counter" onSubmit={event => {
+                event.preventDefault();
+                const value = Number(amount);
+                if (!Number.isFinite(value) || value <= 0 || value >= quote.total) { setError('Enter an amount above ₹0 and below the quoted net price.'); return; }
+                setFeedback(previous => ({ ...previous, [quote.id]: `Demo counteroffer of ${money(value)} recorded. Nothing was sent.` }));
+                setCounterId(null);
+              }}>
+                <label htmlFor={`offer-${quote.id}`}>Your demo offer (₹)</label>
+                <input autoFocus id={`offer-${quote.id}`} type="number" min="1" max={quote.total - 1} step="1" required value={amount} onChange={e => { setAmount(e.target.value); setError(''); }} />
+                {error && <p role="alert">{error}</p>}
+                <div className="vendor-actions"><button type="button" className="solar-button" onClick={() => setCounterId(null)}>Cancel</button><button type="submit" className="solar-button primary">Save demo offer</button></div>
+              </form>
+            ) : <div className="vendor-actions"><button className="solar-button" disabled={quote.total <= 1} onClick={() => { setCounterId(quote.id); setAmount(String(Math.round(quote.total * 0.95))); setError(''); }}>Counter offer</button><button className="solar-button primary" onClick={() => setFeedback(previous => ({ ...previous, [quote.id]: 'Demo bid accepted. No booking or payment was made.' }))}>Accept demo bid <ArrowRight size={15} /></button></div>}
+          </article>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

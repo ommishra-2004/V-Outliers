@@ -242,7 +242,7 @@ export default function ChatWidget() {
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-emerald-400 font-bold text-sm truncate">SuryaPunk AI Advisor</span>
+                    <span className="text-emerald-400 font-bold text-sm truncate">SuryaEase AI Advisor</span>
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   </div>
                   <div className="text-[11px] text-slate-400 flex items-center gap-1">
@@ -281,7 +281,7 @@ export default function ChatWidget() {
                 <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-slate-900 to-slate-900/90 border border-emerald-500/20 text-slate-200 space-y-3">
                   <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
                     <Sparkles className="w-4 h-4 text-emerald-400 animate-pulse shrink-0" />
-                    <span>Namaste! I am your SuryaPunk AI Solar Advisor.</span>
+                    <span>Namaste! I am your SuryaEase AI Solar Advisor.</span>
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     I am trained on the latest 2024–2025 <strong>PM Surya Ghar Muft Bijli Yojana</strong> guidelines, state DISCOM policies, and technical sizing:

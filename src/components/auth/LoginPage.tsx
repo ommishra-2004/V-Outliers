@@ -87,7 +87,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
   const handleDemoFill = () => {
     if (role === 'individual') {
       setEmail('rahul.verma@example.com');
-      setPassword('SuryaPunk2026!');
+      setPassword('SuryaEase2026!');
     } else {
       setEmail('investor.arjun@greengrid.in');
       setPassword('InvestorEV2026!');
@@ -110,7 +110,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between relative overflow-hidden font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
+    <div className="auth-page h-screen w-full bg-slate-950 text-white flex flex-col justify-between relative overflow-hidden font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
       
       {/* ── Global Style Override for Browser Autofill Bug ── */}
       <style dangerouslySetInnerHTML={{__html: `
@@ -149,7 +149,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
 
         <div className="flex items-center gap-2 text-white font-bold text-2xl tracking-tight select-none">
           <Sun className="text-emerald-400 w-7 h-7" />
-          <span>Surya<span className="text-emerald-400 font-light">Punk</span></span>
+          <span>Surya<span className="text-emerald-400 font-light">Ease</span></span>
         </div>
       </header>
 
@@ -173,7 +173,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
                 <Zap className="w-8 h-8 text-emerald-400 relative z-10" />
               </div>
               <h1 className="text-3xl font-bold text-white tracking-tight mb-2">
-                {mode === 'signin' ? 'Welcome back' : 'Join SuryaPunk'}
+                {mode === 'signin' ? 'Welcome back' : 'Join SuryaEase'}
               </h1>
               <p className="text-sm text-slate-400 font-medium">
                 {role === 'individual'
@@ -240,9 +240,11 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
               
               {mode === 'signup' && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Full Name</label>
+                  <label htmlFor="auth-name" className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Full Name</label>
                   <div className="flex items-center w-full bg-black/20 border border-white/5 rounded-2xl focus-within:border-emerald-500/50 focus-within:bg-black/40 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all">
                     <input
+                      id="auth-name"
+                      autoComplete="name"
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -255,12 +257,13 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
 
               {/* Flexbox Email Input (Overlap Proof) */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider">Email Address</label>
+                <label className="text-xs font-semibold text-slate-400 ml-1 uppercase tracking-wider" htmlFor="auth-email">Email Address</label>
                 <div className="flex items-center w-full bg-black/20 border border-white/5 rounded-2xl focus-within:border-emerald-500/50 focus-within:bg-black/40 focus-within:ring-1 focus-within:ring-emerald-500/50 transition-all group">
                   <div className="pl-5 pr-3 flex items-center justify-center text-slate-500 group-focus-within:text-emerald-400 transition-colors">
                     <Mail className="w-5 h-5" />
                   </div>
                   <input
+                    id="auth-email"
                     type="email"
                     value={email}
                     onChange={(e) => {
@@ -277,7 +280,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
               {/* Flexbox Password Input (Overlap Proof) */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between ml-1 pr-1">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Password</label>
+                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider" htmlFor="auth-password">Password</label>
                   {mode === 'signin' && (
                     <button
                       type="button"
@@ -298,6 +301,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
                     <Lock className="w-5 h-5" />
                   </div>
                   <input
+                    id="auth-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => {
@@ -305,11 +309,12 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
                       if (error) setError(null);
                     }}
                     placeholder="••••••••"
-                    autoComplete="current-password"
+                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                     className="w-full bg-transparent py-4 text-sm text-white placeholder:text-slate-600 focus:outline-none"
                   />
                   <button
                     type="button"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword(!showPassword)}
                     className="pr-5 pl-3 flex items-center justify-center text-slate-500 hover:text-white transition-colors cursor-pointer"
                   >
@@ -348,7 +353,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
               
               {mode === 'signin' ? (
                 <p className="text-sm text-slate-400">
-                  New to SuryaPunk?{' '}
+                  New to SuryaEase?{' '}
                   <button
                     type="button"
                     onClick={() => {
@@ -476,7 +481,7 @@ export default function LoginPage({ onSuccess, onBackToHome }: LoginPageProps) {
 
       {/* ── Footer ── */}
       <footer className="relative z-20 px-4 py-8 text-center text-sm font-medium text-slate-500">
-        <span>© 2026 SuryaPunk India • Clean Energy Platform</span>
+        <span>© 2026 SuryaEase India • Clean Energy Platform</span>
       </footer>
 
     </div>

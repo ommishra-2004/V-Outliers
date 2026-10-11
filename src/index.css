@@ -27,27 +27,42 @@ html,
 body,
 #root {
   width: 100%;
-  min-height: 100%;
+  height: 100vh;
+  overflow: hidden !important;
+  margin: 0;
+  padding: 0;
   background: var(--clr-bg-deep);
   color: white;
   font-family: var(--font-body);
   cursor: auto;
-  overflow-x: hidden;
+  user-select: none;
 }
 
-/* Hero page needs overflow hidden for the 3D canvas */
+/* Remove scrollbars and scrolling completely across all pages and containers */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Hero page — overflow hidden for the 3D canvas */
 .hero-page {
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden !important;
 }
 
-/* Solar app scrolls normally */
+/* Solar app viewport — zero window scroll, perfectly contained */
 .solar-page {
   width: 100%;
-  min-height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  height: 100%;
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Base utility for standard text */
