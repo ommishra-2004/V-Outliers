@@ -92,6 +92,9 @@ export default function RooftopMap({ onAreaConfirmed }: RooftopMapProps) {
 
   // State
   const [mode, setMode] = useState<'select' | 'draw' | 'move'>('select');
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<LocationSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -464,6 +467,9 @@ export default function RooftopMap({ onAreaConfirmed }: RooftopMapProps) {
     }
   }, [siteInput.propertyType, updateSiteInput, setDetectedRooftop, renderActivePolygon, clearCandidateOutlines]);
 
+  const handlePinLocationRef = useRef(handlePinLocation);
+  handlePinLocationRef.current = handlePinLocation;
+
   /* ─────────────────────────────────────────────────────────────
      Nudge & Swift Move Helpers
   ───────────────────────────────────────────────────────────── */
@@ -656,15 +662,15 @@ export default function RooftopMap({ onAreaConfirmed }: RooftopMapProps) {
     });
 
     map.on('click', (e: L.LeafletMouseEvent) => {
-      if (mode === 'draw') {
+      if (modeRef.current === 'draw') {
         handleMapClickDuringDraw(e.latlng.lat, e.latlng.lng);
       } else {
-        handlePinLocation(e.latlng.lat, e.latlng.lng, true);
+        handlePinLocationRef.current(e.latlng.lat, e.latlng.lng, true);
       }
     });
 
     mapRef.current = map;
-    handlePinLocation(currentLat, currentLon, true);
+    handlePinLocationRef.current(currentLat, currentLon, true);
 
     return () => {
       map.remove();

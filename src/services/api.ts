@@ -64,7 +64,46 @@ export async function detectRooftop(
     console.warn('Backend rooftop detection offline, falling back to local geometry synthesis:', err);
   }
 
-  // Fallback if backend is unreachable
+  // 1. Attempt direct client-side Nominatim reverse geocoding
+  let cityName = '';
+  let stateName = '';
+  let formattedAddress = `Pinned Location (${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)`;
+
+  try {
+    const geoRes = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`,
+      { headers: { Accept: 'application/json' } }
+    );
+    if (geoRes.ok) {
+      const geoData = await geoRes.json();
+      const addr = geoData.address || {};
+      cityName = addr.city || addr.town || addr.suburb || addr.city_district || addr.county || '';
+      stateName = addr.state || '';
+      formattedAddress = geoData.display_name || formattedAddress;
+    }
+  } catch (e) {
+    console.warn('Direct reverse geocoding fetch failed:', e);
+  }
+
+  // 2. If still missing, determine the nearest Indian city/state using the RTO database
+  if (!cityName || !stateName) {
+    try {
+      const { findNearestRto } = await import('../investor/data/allRtos');
+      const nearest = findNearestRto(lat, lon);
+      if (nearest && nearest.rto) {
+        if (!cityName) cityName = nearest.rto.districtOrCity;
+        if (!stateName) stateName = nearest.rto.state;
+        formattedAddress = `${cityName}, ${stateName} (${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E)`;
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  cityName = cityName || 'Bengaluru';
+  stateName = stateName || 'Karnataka';
+
+  // Fallback geometry synthesis centered on the clicked location
   const defaultArea = propertyType.toLowerCase() === 'commercial' ? 3500 : 1200;
   const rad = Math.PI / 180.0;
   const cosLat = Math.cos(lat * rad);
@@ -77,10 +116,10 @@ export async function detectRooftop(
   return {
     latitude: lat,
     longitude: lon,
-    formatted_address: `Pinned Location (${lat.toFixed(4)}, ${lon.toFixed(4)})`,
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    postcode: '560001',
+    formatted_address: formattedAddress,
+    city: cityName,
+    state: stateName,
+    postcode: '',
     gross_area_sqft: defaultArea,
     usable_area_sqft: Math.round(defaultArea * 0.75),
     source: 'CLIENT_ESTIMATION',
@@ -90,7 +129,7 @@ export async function detectRooftop(
       [lat - dLat, lon + dLon],
       [lat - dLat, lon - dLon]
     ],
-    confidence_score: 0.8,
+    confidence_score: 0.85,
     estimated_max_kw: Math.round((defaultArea * 0.75) / 100)
   };
 }
